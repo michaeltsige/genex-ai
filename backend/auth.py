@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required
 from models import db, User
 
 def configure_auth_routes(app):
+    
     @app.route('/api/register', methods = ['POST'])
     def register():
         data = request.get_json()
@@ -26,11 +27,11 @@ def configure_auth_routes(app):
 
         user = User.query.filter_by(email = data['email']).first()
 
-        if not user or user.check_password(data['password']):
-            return jsonify({"message": "invalid credentials"})
+        if not user or not user.check_password(data['password']):
+            return jsonify({"message": "invalid credentials"}), 401
         
         #built in flask login session management
-        login(user)
+        login_user(user)
 
         return jsonify({'message': 'Logged in', 'user': {
             'id': user.id,
@@ -40,5 +41,5 @@ def configure_auth_routes(app):
     @app.route('/api/logout', methods=['POST'])
     def logout():
         logout_user()
-        return jsonify({"message": "Logged out"})
+        return jsonify({"message": "Logged out"}), 200
 
